@@ -1,0 +1,1012 @@
+import wx
+import os
+import copy
+from random import *
+from ListLib import *
+from string import *
+
+backgroundColor = (10, 10, 10)
+textColor = (100, 200, 255)
+systextColor = (0, 150, 255)
+
+app = wx.App()
+window = wx.Frame(None, title = "Pottersclay Writing Assistant", size = (1900, 1000))
+window.Show()
+
+bkg = wx.Panel(window)
+
+commandButton = wx.Button(bkg, label = "command", pos = (155, 5), size = (80, 25))
+loadButton = wx.Button(bkg, label = "import", pos = (225, 5), size = (80, 25))
+exportButton = wx.Button(bkg, label = "export", pos = (315, 5), size = (80, 25))
+testButton = wx.Button(bkg, label = "analyze", pos = (340, 5), size = (80, 25))
+clearButton = wx.Button(bkg, label = "clear text box", pos = (500, 5), size = (120, 25))
+command = wx.TextCtrl(bkg, pos = (5, 5), size = (210, 25))
+contents = wx.TextCtrl(bkg, pos = (5, 35), size = (390, 260), style = wx.TE_MULTILINE | wx.HSCROLL)
+
+hbox = wx.BoxSizer(wx.HORIZONTAL)
+
+hbox.Add(command, proportion = 1, flag = wx.EXPAND)
+hbox.Add(loadButton, proportion = 0, flag = wx.LEFT, border = 5)
+hbox.Add(testButton, proportion = 0, flag = wx.LEFT, border = 5)
+hbox.Add(exportButton, proportion = 0, flag = wx.LEFT, border = 5)
+hbox.Add(clearButton, proportion = 0, flag = wx.LEFT, border = 5)
+hbox.Add(commandButton, proportion = 0, flag = wx.LEFT, border = 5)
+
+vbox = wx.BoxSizer(wx.VERTICAL)
+vbox.Add(hbox, proportion = 0, flag = wx.EXPAND | wx.ALL, border = 5)
+vbox.Add(contents, proportion = 1, flag = wx.EXPAND | wx.LEFT | wx.BOTTOM | wx.RIGHT, border = 5)
+
+bkg.SetSizer(vbox)
+
+def setColor():
+    
+    
+    contents.SetBackgroundColour(backgroundColor)
+    contents.SetForegroundColour(textColor)
+
+    command.SetBackgroundColour(backgroundColor)
+    command.SetForegroundColour(systextColor)
+
+    window.SetBackgroundColour(backgroundColor)
+
+    loadButton.SetBackgroundColour(backgroundColor)
+    loadButton.SetForegroundColour(systextColor)
+
+    testButton.SetBackgroundColour(backgroundColor)
+    testButton.SetForegroundColour(systextColor)
+
+    exportButton.SetBackgroundColour(backgroundColor)
+    exportButton.SetForegroundColour(systextColor)
+
+    clearButton.SetBackgroundColour(backgroundColor)
+    clearButton.SetForegroundColour(systextColor)
+    
+    commandButton.SetBackgroundColour(backgroundColor)
+    commandButton.SetForegroundColour(systextColor)
+
+
+starterText = """Pottersclay Writing Assistant 
+Version: 1.0
+Creator: Abraham Baker 
+License: CC-BY-NC-SA 
+Platform: Windows, Linux 
+Language: Python 
+Last Updated: January 10, 2024
+
+
+    Hi, hello, and welcome to Pottersclay Writing Assistant! This is a student-created cross-platform program 
+designed to make the lives of Pottersschool students easier by condensing into one software package the 
+various kinds of common errors that your English teacher will mark you down for, including (but not limited to):
+
+    1. Excessive use of "to be" verbs and the passive voice 
+    2. Beginning multiple sentences with the same word 
+    3. Beginning multiple paragraphs with the same word 
+    4. The use of contractions
+    5. Use of the second person
+    
+    To print the currently available Pottersclay Documentation, type the word DOCUMENTATION: (including the colon) into
+the text bar on the top and press "command". To print the credits, see the documentation.
+"""
+eggsFoundCounter = 0
+def easteregg():
+    global eggsFoundCounter
+    eggsFoundCounter += 1
+    window.SetTitle("Pottersclay Writing Assistant [" + str(eggsFoundCounter) + "]")
+
+def printDocumentation():
+    contents.SetValue(contents.GetValue() + """\n\n
+************************
+DOCUMENTATION
+************************
+
+***FAQS***
+
+WHY IS THE ANALYZE TOOL NOT SHOWING THAT MY PARAGRAPHS BEGIN WITH THE SAME WORD?
+    The analyze tool splits your text into paragraphs by counting tab characters. If your
+    document contains no tab characters, the the analyzer considers it to be all one paragraph.
+
+WHY ARE THE IMPORT/EXPORT TOOLS NOT WORKING?
+    You almost certainly have an incorrect file path typed into the bar on the top. If you
+    haven't used file paths before, try selecting a text document on your desktop and clicking
+    "Properties" (or a similar button, depending on your computer). Most will have either a
+    button saying something along the lines of "copy file path" or a piece of text showing
+    just that. Try copying and pasting this into the text bar and clicking "import" or "export".
+    (Clicking "import" for anything but a .txt file will probably cause an error, but have no
+    fears about "export". The program will NEVER overwrite a file. Instead, it will add a 0 to
+    the end, or, if it has already done that, will add a 1, then a 2, then a 3, etc.).
+
+WHY DID MY TEXT COLOR NOT CHANGE?
+    Unfortunately, due to the way the app works, changes to the text color only affect new text
+    or text that has not yet been modified. This is unfortunately an unavoidable error that is
+    built into the GUI package, and it is unlikely to be fixed in the near future.
+    
+WHAT ARE ALL THESE BUTTONS AND BOXES?
+    Please see the ***SYSTEM ELEMENTS*** section below.
+
+
+***COLORS***
+    
+    You can set the color of your interface by entering the following commands into the
+    text bar at the top, and then pressing "command"...
+    
+    *Text color*
+        textcol:r:g:b
+        
+    *System text color*
+        systextcol:r:g:b
+    
+    *Background color*
+        backgrndcol:r:g:b
+    
+    ... where "r", "g", and "b" are positive whole numbers between 0 and 255, as used
+    in the (r,g,b) color system. Alternately, you can use on of a variety of pre-made
+    themes, found in the drop-down menu.
+
+***THEMES***
+
+    If you're not an RGB expert already, or if you just don't want to take the time to make a
+    custom color profile every time you open the app, there's another option! It's called a
+    "theme", and themes can be set quickly and easily by typing theme: and then the name of
+    the theme you want. These are the themes currently supported:
+    
+    aqua
+    blue
+    blurple
+    console
+    dark
+    deepocean
+    forest
+    green
+    grink
+    light
+    navy
+    pink
+    rainbow
+    random [creates a random theme, different every time you run the command]
+    red
+    standard [also is triggered by "default". "basic", or "starter"]
+    techno
+    tiger
+    turquoise
+    utterdarkness
+    volcano
+    yellow
+    
+    *Note on the themes to all my artistic users out there. No, I am not color-blind!
+    However, I am beginning to suspect that the process of converting my code from a
+    .py file on a Linux OS to a .exe file on a Windows OS has corrupted my colors slightly.
+    Therefore, the default theme has been set to white-on-black for this release while I
+    sort out the other color schemes. Thank you for your understanding... and have a good
+    laugh at how absurdly these themes converted while you're at it!
+    -Abraham
+   
+   
+   
+***SYSTEM ELEMENTS***
+
+THE COMMAND LINE
+    The bar at the very top of the app is called the command line. Most users won't need it, but
+    users interested in unlocking some of the more advanced functions might find a use for it
+    occasionally. Various things can be entered on the command line, including specific, pre-
+    included commands that alter the user interface and file paths. More will be explained on it
+    later.
+
+THE TEXT BOX
+    The text box occupies almost all of the screen. It's where you paste the essay you'd like
+    reviewed. All of the other components of the app do something to the text box. It's where
+    you'll see error messages if you mistype a command, as well as the program output when you
+    click the analyze button. The most important thing to remember about the text box is that
+    while the program can write things in it if you ask it to, it can NEVER delete anything
+    from it unless you click the "clear text box" button or the "import" button and use a valid
+    file path.. The power to delete data belongs to the user alone, so don't worry--your essay
+    is safe!
+
+THE IMPORT BUTTON
+    The import button is one of the harder buttons to use correctly. To use it, you must first
+    enter a valid file path to a .txt file in the command line. Other types of files will not
+    be processed correctly, or possibly at all. (If you're unsure of what a .txt file is, it's
+    the kind of file used by apps like Notepad. Most word-processors will allow you to save files
+    as .txt). 
+
+THE ANALYZE BUTTON
+    The analyze button is arguably the most useful button in the app. When clicked, it runs a
+    series of highly-specialized scans over the text in your essay. Then it writes an "analytics
+    document" and pastes it at the bottom of your essay. This block of text contains information
+    about things like your word count, number of sentences that begin with the same word, etc.
+
+THE EXPORT BUTTON
+    The export button works the same as the import button, except that it causes the contents of
+    the text box to be saved at the location you specify using the file path. The export function
+    will NEVER overwrite an existing file: instead, it will add numbers to the file path if that
+    file already exists. The most recent file will be the one with the highest number on the end.
+    
+THE CLEAR TEXT BOX BUTTON
+    This button does exactly what it says--it wipes the text box clean. Don't press it by accident.
+
+THE COMMAND BUTTON
+    This button causes the program to examine what is in the command line and try to interpret it
+    as a command. A list of valid commands and instructions on how to use them are found below.
+    Until this button is pressed, no command will execute. But if you're reading this message, you've
+    already figured that out by executing the DOCUMENTATION: command...
+
+
+
+***COMMANDS***
+    The following commands are valid on the command line at this time:
+    
+    >>>DOCUMENTATION:
+        This command prints the currently available Pottersclay documentation--the very document that
+        you are now reading. Chances are, you've already figured this one out. But just to show the
+        pattern:
+        1. The >>> before the command are a Pythonic relic in the system. You shouldn't type these:
+            they serve to indicate that what follows is a line of code.
+        2. The ":" at the end is absolutely essential. The program will not interpret the word as a
+            command without it. More colons may be necessary depending on which command you are entering.
+    
+    >>>CREDITS:
+        This command works just like DOCUMENTATION:, except that it prints the app credits instead.
+    
+
+    >>>theme:[insert theme here]
+        This command changes the app color scheme as described above in the ***THEMES*** section.
+    
+    >>>bckgrndcol:[r]:[g]:[b]
+    >>>textcol:[r]:[g]:[b]
+    >>>systextcol:[r]:[g]:[b]
+        All three commands work the same way. These commands alter the colors of different elements of
+        the app. After entering the text of the command, enter a total of three colons, with numbers
+        between 0 and 255 between them. For example, a command to change the background green might look like:
+                                            bckgrndcol:0:255:0
+        Please do not enter numbers out of rgb range--you'll confuse the app.
+
+    
+    
+""")
+
+
+def printCredits():
+    contents.SetValue(contents.GetValue() + """\n\n
+************************
+CREDITS
+************************
+
+    The Pottersclay Writing Assistant was created using the WxPython GUI Toolkit, using the Python programming language. 
+The creator would like to thank the creators of WxPython for their excellent toolkit, and Denise Yagel of TPS for her
+support of this project.
+
+    The Pottersclay Writing Assistant makes use of much code borrowed from the Cryptostar, Command Executor,
+and Pottersclay-Alpha Applications. Cryptostar contains code derived from "Hacking Secret Ciphers With
+Python", by Al Sweigart. (To the author's knowledge, none of Sweigart's code is directly included in this application.
+However, the possibility remains that some lines were used by accident. Should this be the case, the author would like to
+credit Sweigart for his code.)
+
+This software was converted to a .exe file by the auto-py-to-exe application. It is by far the best application for the
+purpose that the author has yet found, and he would like to thank its creators.
+
+The Pottersclay Writing Assistant is open-source software, and the Python source code for it is included in the application
+download package. Updates, bug fixes, and general improvements are welcomed, and other coders are encouraged to email their
+contributions to the GitHub user PurpleRabbit75.
+
+
+
+
+P.S. Thank you for reading the credits! As a reward for your diligence (or perhaps your boredom), you have been invited to a
+treasure hunt. This program contains a variety of what are known in computing as "Easter Eggs"--little things that I've hidden
+in the program for my own amusement. They are wholly undocumented. As a reward, the first person to contact me having found a new
+Easter Egg that nobody else has yet found will be given an opportunity to hide their own Easter Egg in the program for all future
+users to find... no knowledge of coding required. Just find me on TPS Campus or GitHub.
+
+P.P.S. A bracketed number will appear on the window title when you have found an Easter Egg. People who find all of them will be
+highly praised. (If you don't know if you've found all of them, then you haven't).""")
+    
+    
+
+                                                                 ### FileSave and debug Modules ###
+    
+    
+    
+def makeNewFileName(oldName):
+    newFileName = oldName
+    if (os.path.exists(oldName)):
+        while (os.path.exists(newFileName)):
+            splitPath = os.path.split(oldName)
+            fileBase = splitPath[0]
+            fileName = splitPath[1]
+            for i in range (10):
+                number = str(i)
+                if (fileName[len(fileName)-1] == number):        
+                    newFileName = fileName[:(len(fileName))-1] + str(int(number)+1)
+                    testedName = makeNewFileName(newFileName)
+                    return testedName
+            if (fileName[len(fileName)-1] != number):
+                newFileName = fileName + "0"
+                testedName = makeNewFileName(newFileName)
+                return testedName
+    
+    else:
+        return newFileName
+    
+
+def exportFile(file = contents.GetValue(), exportPath = command.GetValue()):
+    counter = False
+    if (counter):
+        path = makeNewFileName(exportPath)
+        strfile = str(file)
+        with open(path, 'x') as outputDocument: # Change the 'x' to 'w' to allow overwrites.
+            for i in range (len(strfile)):
+                outputDocument.write(strfile[i])
+            outputDocument.close()
+    else:
+        counter = True
+
+
+def importFile(importPath):
+    if (pathExists(str(importPath))):
+        with open(str(importPath), "r") as inputDocument:
+            file = inputDocument.read()
+            inputDocument.close()
+        return file
+    else:
+        raiseError("You entered an invalid file path.")
+
+def clearDuplicates(List):
+    newList = []
+    for item in List:
+        if (item not in newList):
+            newList.append(item)
+    return newList
+
+# def dictionary():
+#     dictionaryStr = importFile("/home/adam/Desktop/dictionary.txt")
+#     dictionary = []
+#     for word in dictionaryStr.split("\n"):
+#         dictionary.append(word)
+#     return dictionary
+
+
+
+                                                                ### Command Executor Modules ###
+
+
+
+def raiseError(clarification):
+    if (clarification == None):
+        clarification = "I'm afraid I can provide no specific data on this problem."
+    errorString = """
+*************************************************************************
+     I'm sorry, but I don't understand the command that you are trying to enter.
+Check the spelling of the command, and make sure that you have included all
+the necessary parameters and the colon.
+""" + clarification + "\n*************************************************************************"
+    
+    contents.SetValue(contents.GetValue() + errorString)
+
+
+def theme(name, EasterEgg = False):
+    global textColor
+    global backgroundColor
+    global systextColor
+    
+    if (name == "red"):
+        textColor = (0, 0, 0)
+        backgroundColor = (255, 50, 50)
+        systextColor = (0, 0, 0)
+    elif (name == "green"):
+        textColor = (0,0, 255)
+        backgroundColor = (0, 255, 0)
+        systextColor = (0, 0, 255)
+    elif (name == "blue"):
+        systextColor = (0, 100, 205)
+        backgroundColor = (20, 20, 255)
+        systextColor = (0, 150, 255)
+    elif (name == "standard" or name == "default" or name == "basic" or name == "starter"):
+        backgroundColor = (10, 10, 10)
+        textColor = (100, 200, 255)
+        systextColor = (0, 150, 255)
+    elif (name == "dark"):
+        backgroundColor = (10, 10, 10)
+        textColor = (255, 255, 255)
+        systextColor = (255, 255, 255)   
+    elif (name == "light"):
+        backgroundColor = (255, 255, 255)
+        textColor = (0, 0, 0)
+        systextColor = (0, 0, 0)
+    elif (name == "pink"):
+        backgroundColor = (255, 0, 255)
+        textColor = (10, 0, 10)
+        systextColor = (10, 0, 10)
+    elif (name == "turquoise"):
+        backgroundColor = (0, 255, 255)
+        textColor = (0,0, 255)
+        systextColor = textColor
+    elif (name == "yellow"):
+        backgroundColor = (255, 255, 0)
+        textColor = (10, 0, 10)
+        systextColor = (10, 0, 10)
+    elif (name == "rainbow"):
+        backgroundColor = (255, 0, 0)
+        textColor = (0, 255, 0)
+        systextColor = (0, 0, 255)
+    elif (name == "random"):
+        backgroundColor = (randrange(0, 255), randrange(0, 255), randrange(0, 255))
+        textColor = (randrange(0, 255), randrange(0, 255), randrange(0, 255))
+        systextColor = (randrange(0, 255), randrange(0, 255), randrange(0, 255))
+    elif (name == "forest"):
+        backgroundColor = (0, 75, 0)
+        textColor = (90, 20, 0)
+        systextColor = (0, 0, 0)
+    elif (name == "grink"):
+        backgroundColor = (0, 255, 0)
+        textColor = (255, 0, 255)
+        systextColor = textColor
+    elif (name == "blurple"):
+        backgroundColor = (0, 0, 75)
+        textColor = (170, 0, 170)
+        systextColor = textColor
+    elif (name == "techno"):
+        backgroundColor = (50, 50, 50)
+        textColor = (0, 100/2, 250/2)
+        systextColor = textColor
+    elif (name == "tiger"):
+        backgroundColor = (255, 75, 0)
+        textColor = (0, 0, 0)
+        systextColor = textColor
+    elif (name == "console"):
+        backgroundColor = (0, 0, 0)
+        textColor = (0, 255, 0)
+        systextColor = textColor
+    elif (name == "aqua"):
+        backgroundColor = (0, 215, 215)
+        textColor = (0, 100, 0)
+        systextColor = (0,0, 255)
+    elif (name == "deepocean"):
+        backgroundColor = (0, 0, 30) # was 0, 0, 50, very nice blue
+        textColor = (0, 150, 0)
+        systextColor = (0, 100, 0)
+    elif (name == "navy"):
+        backgroundColor = (0, 0, 50)
+        textColor = (70, 70, 70)
+        systextColor = textColor
+    elif (name == "utterdarkness"):
+        backgroundColor = (0, 0, 0)
+        textColor = (90, 90, 90)
+        systextColor = textColor
+    elif (name == "volcano"):
+        backgroundColor = (20, 20, 20)
+        textColor = (255, 0, 0)
+        systextColor = (255, 75, 0)
+    elif (name == "cabbage" and EasterEgg == True):
+        backgroundColor = (100, 255, 100)
+        textColor = (0, 0, 0)
+        systextColor = (0, 100, 0)
+        
+        
+    setColor()
+
+
+def freeze(freezeCounter):
+    freezeCounter += 1
+    if (freezeCounter == 100):
+        while(True):
+            pass
+    freeze(freezeCounter)
+        
+
+def execute(variable):
+    global textColor
+    global backgroundColor
+    global systextColor
+    
+    
+    instructions = command.GetValue().split(":")
+    order = instructions[0]
+    parameter1 = None
+    parameter2 = None
+    parameter3 = None
+    
+    if (len(instructions) == 2):
+        parameter1 = instructions[1]
+        
+    elif (len(instructions) >= 3):
+        parameter1 = instructions[1]
+        parameter2 = instructions[2]
+        parameter3 = instructions[3]
+    
+    if (order == "DOCUMENTATION"):
+        printDocumentation()
+        
+    elif(order == "textcol"):
+        r, g, b = int(parameter1), int(parameter2), int(parameter3)
+        textColor = (r, g, b)
+        setColor()
+    
+    elif(order == "systextcol"):
+        r, g, b = int(parameter1), int(parameter2), int(parameter3)
+        systextColor = (r, g, b)
+        setColor()
+    
+    elif(order == "bckgrndcol"):
+        r, g, b = int(parameter1), int(parameter2), int(parameter3)
+        backgroundColor = (r, g, b)
+        setColor()
+    
+    elif (order == "theme"):
+        theme(parameter1)
+    
+    elif (order == "CREDITS"):
+        printCredits()
+    
+    elif (order == "freeze"):
+        
+        command.SetValue("")
+        clear(None)
+        reply("""
+Hi! If you're reading this, it means that someone with far too much time on their hands has in fact read through the app code and discovered this Easter Egg command.
+As a bonus to them, only they get to know it. As of now, the app is locked down, and can only be unlocked by closing it and opening it up again. All complaints should
+be addressed to whomever was clever enough to read through all of my code, and mischeivous enough to actually use that knowledge.""")
+        freeze(0)
+        easteregg()
+    
+    elif (order == "lol" or order == "LOL"):
+        theme("rainbow")
+        easteregg()
+    
+    elif (order == "this app is awesome"):
+        command.SetValue("Thank you! I appreciate it!")
+        reply("As a reward for having found this easter egg, I now give you the following hint: the easter egg counter need only reach 6 to prove discovery of all Easter eggs if the user can verbally report the effects of the seventh.")
+        easteregg()
+    
+    elif (order == "meow"):
+        theme("tiger")
+        command.SetValue("Purrrrrrrrrrrrrrrrrrrrrrr...")
+        easteregg()
+    
+    elif (order == "EASTEREGG" or order == "EASTEREGGS"):
+        command.SetValue("I appreciate your inventiveness, but... nice try. I'm not giving you a list. You'll need to either search the source code or use your imagination to find the other 6 Easter Eggs.")
+        reply("""\n\n
+************************
+EASTER EGGS
+************************
+Easter Egg: NOUN
+[eester eg]
+A small trick, clue, or other minor and harmless addition to a program, usually triggered by an unusual and/or creative user input.
+
+"""
+            )
+        easteregg()
+    
+    elif (order.upper() == "CABBAGE" or order.upper() == "CABBAGES"):
+        command.SetValue("Someone was bound to try this eventually... fyi the other cabbage Easter Egg was just a joke. Maybe.")
+        theme("cabbage", EasterEgg = True)
+        easteregg()
+        
+        
+        
+        
+    else:
+        raiseError("Specifically, the text you put in the text box is not in the index of valid commands, so the program is confused.")
+
+
+def openFunct(variable):
+    contents.SetValue(importFile(command.GetValue()))  
+
+def clear(variable):
+    contents.SetValue("")
+
+def find(text):
+    posIndices = []
+    windows = []
+    windowSize = len(text)
+
+    lines = contents.GetValue().split("\n")
+    for lineID in range(len(lines)):
+        line = lines[lineID]
+        
+        for i in range ( len(line) - windowSize):
+            windows.append( (line[i: i + windowSize], i, lineID) )
+            
+        for item in windows: 
+            if (item[0] == text):
+                posIndices.append((item[2], item[1]))
+
+    
+    posIndices = removeDuplicatesInAList(posIndices)   
+    return posIndices
+
+
+def count(item):
+    text = contents.GetValue()
+    if (item == "characters"):
+     
+        contents.SetValue(text + "\n\nThe number of characters currently in your text (not counting this message) is " + str(len(text)))
+    elif (item == "words"):
+        text = text.rstrip("\r\n")
+        words = text.split(" ")
+     
+        contents.SetValue(text + "\n\nThe number of words currently in your text (not counting this message) is " + str(len(words)))
+
+
+def reply(message):
+    contents.SetValue(contents.GetValue() + "\n" + message)
+
+
+
+                                                                ### Cryptostar Modules ###
+    
+
+def removeNonLetters(message):
+    UPPERLETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    lettersAndSpace = UPPERLETTERS + UPPERLETTERS.lower()
+    lettersOnly = []
+    for symbol in message:
+        if (symbol in lettersAndSpace and symbol != ""):
+            lettersOnly.append(symbol)
+    return ''.join(lettersOnly)
+
+
+                                                                ### Original Pottersclay Modules ###
+
+def getFirstWord(paragraph):
+    words = paragraph.split(" ")
+    for word in words:
+        if (word != " " and word != "" and word != "\t"):
+            return word
+                
+
+def initialWordsInParagraphs(paragraphs):
+    initialWords = []
+    problemSentenceIndices = []
+    #initialWords.append(paragraphs[0].split(" ")[0])
+    for i in range(1, len(paragraphs)):
+        initialWords.append(getFirstWord(paragraphs[i]))
+        #print(paragraphs[i].split(" "))
+#         paragraph = paragraphs[i]
+#         words = paragraph.split(" ")
+#         initialWords.append(words[0])
+    for i in range (len(initialWords)):
+        for j in range (len(initialWords)):
+            if((initialWords[i] == initialWords[j]) and (i != j)):
+                problemSentenceIndices.append(i)
+                problemSentenceIndices.append(j)
+#     print(initialWords)          
+#     logList(initialWords, True, "print")
+  
+    answerString = ""
+    problemSentenceIndices = clearDuplicates(problemSentenceIndices)
+    if (len(problemSentenceIndices) == 0):
+        answerString = "\nNone of your paragraphs begin with the same word. Congratulations!"
+    else:
+        answerString = "\nThe following paragraphs begin with the same word: "
+        for i in problemSentenceIndices:
+            answerString = answerString + str(i+1) + ", "
+        answerString = answerString + "This does not make for good reading in a formal composition. Go ahead and fix it now..."
+       
+    reply(answerString)
+
+def chopASentence(text):
+    punctuation = [".", "!", "?"]
+    for i in range (len(text)):
+        if (text[i] in punctuation):
+            return (text[:(i + 1)], text[(i + 1):])
+            
+            
+def initialSentenceWords(fixedText):
+    text = copy.deepcopy(fixedText) + " "
+    sentences = []
+    while ("." in text or "!" in text or "?" in text):
+        sliced = chopASentence(text)
+        sentences.append(sliced[0])
+        text = sliced[1]
+        
+    problemSentenceIndices = []
+    initialWords = []
+    for sentence in sentences:
+        initialWords.append(getFirstWord(sentence))
+    #print(initialWords)
+    initialWords = setType(initialWords, str, 'clip')
+    for i in range (len(initialWords)):
+        for j in range (len(initialWords)):
+            if((initialWords[i] == initialWords[j]) and (i != j)):
+                problemSentenceIndices.append(i)
+                  
+    answerString = ""
+    problemSentenceIndices = clearDuplicates(problemSentenceIndices)
+    
+    if (len(problemSentenceIndices) == 0):
+        answerString = "\nIn none of your paragraphs do two sentences begin with the same word. Congratulations!"
+        
+    else:
+        answerString = "\nThe following sentences begin with the same word: "
+        
+        for i in problemSentenceIndices:
+            answerString = answerString + str(i+1) + ", "
+        answerString = answerString + "This is not good, and you should fix this. Nobody likes repetition in a prose composition." + "\n*NOTE: For the purposes of this software sentences are defined by the presense of \".\", \"?\", or \"!\"."
+        
+    reply(answerString)
+    
+
+def wordAnalytics(allWordsPlain):
+    allWords = []
+    dictionary = []
+    wordList = []
+    answerList = []
+    
+    answer = "\n\n************************\nWord Analytics\n************************\n"
+    
+    
+    for char in allWordsPlain:
+        allWords.append(removeNonLetters(char))
+    
+    
+    for word in allWords:
+        word = removeNonLetters(word)
+        if (word not in wordList):
+            wordList.append(word)
+    
+    
+    for i in range (len(allWords)):
+        allWords[i] = allWords[i].upper()
+    allWords = sorted(allWords)
+        
+        
+    for i in range (len(wordList)):
+        wordList[i] = wordList[i].upper()
+    wordList = sorted(wordList)
+
+    for dictWord in wordList:
+        wordCounter = 0
+        for word in allWords:
+            if (dictWord == word):
+                wordCounter += 1
+        
+        wordList = clearDuplicates(wordList)
+                    
+        if (dictWord != ""):        
+            analyticsRow = dictWord + " : " + str(wordCounter) + "\n"
+            if (analyticsRow not in answer):
+                answer = answer + analyticsRow
+            pair = (dictWord, wordCounter) 
+            if (pair not in dictionary):
+                dictionary.append(pair)
+
+
+    reply(answer + "\n************************")
+    count("characters")
+    count("words")
+    
+    
+    dictionary = clearDuplicates(dictionary)
+    finalDictionary = dict(dictionary)
+    return finalDictionary
+        
+        
+    
+def countToBe(dictionary):
+    verbs = ["AM", "IS", "ARE", "WAS", "WERE", "BEING", "BEEN", "BE", "ISNT", "ARENT", "WASNT", "WERENT"]
+    counter = 0
+    for verb in verbs:
+        if (verb in dictionary):
+            counter += dictionary[verb.upper()]
+    reply('\nThe "to be" verbs am, is, are, was, were, being, been, and be occur ' + str(counter) + " times in your text, not counting analytics. This also counts common contractions of these verbs. \nYou should consider removing these, since they are often indicators of the passive voice, which makes your compositions boring.")
+        
+            
+    
+def processText(text):
+    lines = text.split("\n")
+    nLinesAsSpace = ""
+    for line in lines:
+        nLinesAsSpace = nLinesAsSpace + line + " "
+    
+    punctAsPeriods = nLinesAsSpace 
+    for charIndex in range(len( nLinesAsSpace)):
+        char = nLinesAsSpace[charIndex]
+        if (char == "!"):
+            punctAsPeriods = nLinesAsSpace[:charIndex] + "." + nLinesAsSpace[charIndex+1:]
+        if (char == "?"):
+            punctAsPeriods = nLinesAsSpace[:charIndex] + "." + nLinesAsSpace[charIndex+1:]
+
+    return punctAsPeriods
+    
+    
+def countContractions(text):
+    counter = 0
+    for letter in text:
+        if (letter == "'"):
+            counter += 1
+    if (counter == 0):
+        reply("\n\nThere are no contractions in your text.")
+    if (counter == 1):
+        reply("\n\nYour text contains 1 \"'\" character, which is probably an indicator of a contraction. REMOVE IT.")
+    if (counter > 1):
+        reply("\n\nYour text contains " + str(counter) + "\"'\" characters, which are usually indicators of contractions. REMOVE THEM.")
+
+
+def secondPerson(dictionary):
+    banned = ["YOU", "YOUR", "YOURS", "YOURSELF"]
+    counter = 0
+    for word in banned:
+        if (word in dictionary):
+            counter += 1
+    if (counter != 0):
+        reply("\nYour composition contains " + str(counter) + " second person pronouns. REMOVE THEM!")
+        
+
+def passiveVoice(words):
+    passiveIndicators = ["stands", "remains", "appears", "Another one", "One of", "There", "once", "Once", "am", "is", "are", "was", "were", "being", "been", "be", "Being"]
+    clunks = []
+    for word in words:
+        if (word in passiveIndicators):
+            clunks.append(word)
+    if (len(clunks) > 0):
+        clunksStr = ""
+        for i in clunks:
+            clunksStr = clunksStr + i + ", "
+        reply("\nYour composition contains words which may be indicators of the passive voice. If they are, you should remove them:\n" + clunksStr)
+    else:
+        reply("\nNone of the pre-programmed passive-voice indicators were found in your text. However, you should still review your composition\nto ensure the absence of the passive voice.")
+
+def cabbages(words):
+    easteregg()
+    for word in words:
+        if (word.lower() == "cabbage" or word.lower() == "cabbages"):
+            command.SetValue("<!>CAUTION!<!> The use of the word \"cabbage\" is forbidden in this writing assistant! Unintended consequences may ensue!")
+            reply("\nBwa ha ha, you found the cabbage Easter Egg! Congrats! (Fear not... there are no unintended consequences...)")
+
+def test(variable):
+    
+    command.SetValue("Running word analytics...")
+    text = contents.GetValue()
+    text = processText(text)
+    allWords = []
+    paragraphs = text.split("    ")
+    allSentences = []
+    
+    
+    
+    for i in range(len(paragraphs)):
+        paragraph = paragraphs[i]
+        sentences = paragraph.split(".")
+        for sentence in sentences:
+            if (sentence not in string.whitespace and sentence != ""):
+                onlyBlanks = True
+                for char in sentence:
+                    if (char not in string.whitespace):
+                        onlyBlanks = False
+                if (onlyBlanks == False):
+                    while (sentence[0] == " "):
+                        sentence = sentence[1:]
+                    allSentences.append(sentence)
+                    words = sentence.split(" ")
+                    for word in words:
+                        allWords.append(word)
+              
+    command.SetValue("Compiling dictionary...")
+    dictionary = wordAnalytics(allWords)
+    
+    command.SetValue("Running paragraph beginning tests...")
+    initialWordsInParagraphs(paragraphs)
+    
+    command.SetValue("Running sentence beginning tests...")
+    initialSentenceWords(text)
+    
+    command.SetValue("Counting to be verbs...")
+    countToBe(dictionary)
+    
+    command.SetValue("Checking for passive voice...")
+    passiveVoice(allWords)
+    
+    command.SetValue("Checking for second person pronous...")
+    secondPerson(dictionary)
+    
+    command.SetValue("Analytics are finished!")
+    cabbages(allWords)
+    
+    contents.SetValue(contents.GetValue() + "\n\n\n\n\n")
+    
+    
+    
+
+### Finish setting up the GUI with the functions defined above ###
+# menubar = wx.MenuBar()
+# fileMenu = wx.Menu()
+# quitButton = fileMenu.Append(wx.ID_EXIT, 'Quit')
+# openButton = fileMenu.Append(wx.ID_OPEN, 'Open')
+# menubar.Append(fileMenu, 'File')
+# window.SetMenuBar(menubar)
+
+contents.SetValue(starterText)
+# command.SetValue("/home/adam/Desktop/Pottersclay Test Doc")
+loadButton.Bind(wx.EVT_BUTTON, openFunct)
+testButton.Bind(wx.EVT_BUTTON, test)
+exportButton.Bind(wx.EVT_BUTTON, exportFile())
+clearButton.Bind(wx.EVT_BUTTON, clear)
+commandButton.Bind(wx.EVT_BUTTON, execute)
+
+#window.Bind(wx.EVT_MENU, theme("dark"), quitButton)
+theme("dark")
+setColor()
+
+
+
+### GO! ###
+app.MainLoop()
+
+
+
+
+
+# def countStr(char, printValue = True):
+#     text = contents.GetValue()
+#     occurences = text.count(char)
+#     if (printValue):
+#         output = "\n\nThe string " + char + " occurs " + str(occurences) + " times in your text (not counting this message)."
+#         contents.SetValue(text + output)
+#     return occurences
+
+# def raiseError(clarification):
+#     if (clarification == None):
+#         clarification = "I'm afraid I can provide no specific data on this problem."
+#     errorString = """
+# *************************************************************************
+#      I'm sorry, but I don't understand the command that you are trying to enter.
+# Check the spelling of the command, and make sure that you have included all
+# the necessary parameters and the colon, and that you have not added any ">"
+# characters before the command or extra ":" characters within the command.
+# Entering the "undo:" command will erase this template message.
+# """ + clarification + "\n*************************************************************************"
+#     
+#  
+#     contents.SetValue(contents.GetValue() + errorString)
+    
+# def flagToBe(text):
+#     verbs = [" am ", " is ", " are ", " being ", " been ", " be "]
+#     indicesList = []
+#     for verb in verbs:
+#         individualizedVerbList = find(verb)
+#         for index in individualizedVerbList:
+#             indicesList.append(index)
+#     newText = mark(indicesList, text)
+#  
+#     contents.SetValue(newText)
+# 
+# def countToBe(text):
+#     verbs = [" am ", " is ", " are ", " being ", " been ", " be "]
+#     occurences = 0
+#     for verb in verbs:
+#         occurences += countStr(verb, False)
+#     output = "\n\nThe forms of \"to be\" am, is, are, was, were, being, been, and be, occur " + str(occurences) + " times in your text (not counting this message)."
+#     contents.SetValue(text + output)
+        
+# def mark(indicesList, text):
+# 
+#     indicesSortedByLine = []
+#     numLines = indicesList[len(indicesList)-1][0]
+#     for lineNum in range(numLines):
+#         lineList = []
+#         for index in indicesList:
+#             if(index[0] == lineNum):
+#                 lineList.append(index[1])
+#         indicesSortedByLine.append(lineList)
+#             
+#     lines = text.split("\n")
+#     newText = ""
+#     for i in range (len(lines)):
+#         line = lines[i]
+#         lineIDs = []
+#         for pair in indicesList: # indicesList contains tuples in the form (lineID, index of item on that line)
+#             lineID = pair[0]
+#             lineIDs.append(lineID)
+#         if (i not in lineIDs):
+#             newText = newText + line + "\n" + (len(line) * "_") + "\n"
+#         else:
+#             #for index in indicesList: 
+#             for index in range (len(indicesSortedByLine)):
+#                 if (i == index): # pick the correct line for each index
+#                     newLine = ""
+#                     for posIndex in range(len(indicesSortedByLine[index])):
+#                         pos = indicesSortedByLine[index][posIndex]
+#                         newLine = newLine + "_" * (pos - posIndex) + "^"
+#                     # newLine = line + "\n" + ("_" * index[1]) + "^" + (((len(line) - len(newLine)) * "_")) + "\n"
+#                     newLine = newLine + "_" * (len(line) - len(newLine))
+#                     newText = newText + line + "\n" + newLine + "\n"
+#     return newText 
